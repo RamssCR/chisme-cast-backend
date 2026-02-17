@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# List the branches you want to protect, separated by pipes |
+protected_branches="main|master|develop|production|dummy/dummy-branch"
+
+# This reads the destination branch from Git's standard input
+while read local_ref local_sha remote_ref remote_sha
+do
+    # Extract the branch name from the full ref (e.g., refs/heads/main -> main)
+    branch_name="${remote_ref##*/}"
+
+    if echo "$protected_branches" | grep -qE "(^|\|)$branch_name($|\|)"; then
+        echo "----------------------------------------------------"
+        echo "🚫 HOLD UP! You are trying to push to: $branch_name"
+        echo "This branch is protected by your local pre-push hook."
+        echo "----------------------------------------------------"
+        exit 1 # This status code stops the push
+    fi
+done
+
+exit 0
